@@ -11,6 +11,7 @@ typedef enum functor {
 } functor;
 
 typedef enum Flag {
+	none,
 	flagZ, flagN, flagH, flagC,
 	flagNZ, flagNN, flagNH, flagNC
 } Flag;
