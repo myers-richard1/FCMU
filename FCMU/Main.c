@@ -29,7 +29,7 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		cycle();
 		processInput();
-		//render_console();
+		render_console();
 		render_screen();
 		
 		//getchar();

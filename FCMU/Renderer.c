@@ -9,17 +9,34 @@ GLuint renderTextureBuffer;
 GLint renderTexture;
 GLenum drawBuffers[1];
 
-GLuint global_VAO;
+GLuint screen_VAO;
+GLuint console_VAO;
+
 GLuint screen_VBO; 
 GLuint console_VBO;
 
 GLuint screen_VertexShader, screen_FragmentShader;
 GLuint screen_program;
 
-static const GLfloat points[] = {
+GLuint console_VertexShader, console_FragmentShader;
+GLuint console_program;
+
+const int consoleHorizontalResolution = 160;
+const int consoleVerticalResolution = 160;
+
+static const GLfloat triangle_points[] = {
 	-1, -1, 0,
 	1, -1, 0,
 	0, 1, 0
+};
+
+static const GLfloat quad_points[] = {
+	-1, -1, 0,
+	-1, 1, 0,
+	1, -1, 0,
+	-1, 1, 0,
+	1, 1, 0,
+	1, -1, 0
 };
 
 GLFWwindow* init_renderer() {
@@ -43,13 +60,14 @@ GLFWwindow* init_renderer() {
 	/*set up resize callback*/
 	glfwSetFramebufferSizeCallback(window, resize_callback);
 
-	//gen the vao
-	glGenVertexArrays(1, &global_VAO);
-	glBindVertexArray(global_VAO);
-
-	
+	//gen and bind the vao for the screen
+	glGenVertexArrays(1, &screen_VAO);
+	glBindVertexArray(screen_VAO);
 	init_screen_buffers();
-	
+	 //gen and bind the vao for the console
+	glGenVertexArrays(1, &console_VAO);
+	glBindVertexArray(console_VAO);
+	init_console_buffers();
 	
 	return window;
 }
@@ -67,10 +85,13 @@ void init_console_buffers(){
 	//bind the texture 
 	glBindTexture(GL_TEXTURE_2D, renderTexture);
 	//empty image(?)
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 160, 160, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, consoleHorizontalResolution, 
+		consoleVerticalResolution, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	//suggested by learnopengl
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 	//skipping depth buffer. dont see a point for it
 	//set rendertexture as the color attachment 0
@@ -82,6 +103,32 @@ void init_console_buffers(){
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		printf("Something wrong with the render texture");
+
+	//set up shaders 
+	char* vertexshadersrc = loadShader("console.vert");
+	char* fragshadersrc = loadShader("console.frag");
+
+	console_VertexShader = glCreateShader(GL_VERTEX_SHADER);
+	console_FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(console_VertexShader, 1, &vertexshadersrc, NULL);
+	glShaderSource(console_FragmentShader, 1, &fragshadersrc, NULL);
+
+	glCompileShader(console_VertexShader);
+	glCompileShader(console_FragmentShader);
+
+	console_program = glCreateProgram();
+	glAttachShader(console_program, console_VertexShader);
+	glAttachShader(console_program, console_FragmentShader);
+	glLinkProgram(console_program);
+
+	glBindBuffer(GL_ARRAY_BUFFER, console_VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_points), triangle_points, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	free(vertexshadersrc);
+	free(fragshadersrc);
 }
 
 void init_screen_buffers() {
@@ -124,34 +171,44 @@ void init_screen_buffers() {
 	glLinkProgram(screen_program);
 
 	printf("Finished setting up screen program\n");
+
+	printf("binding\n");
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, screen_VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quad_points), quad_points, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	printf("attribute arrays\n");
+	free(vertexshadersrc);
+	free(fragshadersrc);
 }
 
 void render_console() {
 	glBindFramebuffer(GL_FRAMEBUFFER, renderTextureBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, console_VBO);
-	glViewport(0, 0, 160, 160);
+	glUseProgram(console_program);
+	glViewport(0, 0, consoleHorizontalResolution, consoleVerticalResolution);
+	glClearColor(1, 0, 1, 1);
+	glClear(GL_COLOR_BUFFER_BIT); 
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void render_screen() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, renderTexture);
 	printf("begin render\n");
 	glUseProgram(screen_program);
-	
+	glViewport(0, 0, 600, 600);
+	glBindVertexArray(screen_VAO);
 
-	printf("binding\n");
-	
-	
-	glBindBuffer(GL_ARRAY_BUFFER, screen_VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	printf("attribute arrays\n");
+	//get id of texture in fragment shader
+	GLuint textureID = glGetUniformLocation(screen_program, "consoleTexture");
 
 	glClearColor(0, 1, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDisableVertexAttribArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
