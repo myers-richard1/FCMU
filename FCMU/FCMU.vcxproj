@@ -146,10 +146,14 @@
     <ClCompile Include="cpu.c" />
     <ClCompile Include="Main.c" />
     <ClCompile Include="Memory.c" />
+    <ClCompile Include="Renderer.c" />
+    <ClCompile Include="shaderloader.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpu.h" />
     <ClInclude Include="Memory.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="shaderloader.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
