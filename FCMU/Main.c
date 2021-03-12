@@ -7,6 +7,7 @@
 #include "Memory.h"
 #include "cpu.h"
 #include "Renderer.h"
+#include "TextureTest.h"
 
 void init();
 
@@ -17,9 +18,12 @@ void render();
 void load_rom(char *filename);
 
 int main() {
-	printf("Hello, graphics world!\n");
-	window = init_renderer();
 	init_map();
+	test();
+	return 0;
+	printf("Hello, graphics world!\n");
+	
+	window = init_renderer();
 	load_rom("output.bin");
 	printf("Map[0] = %x\n", map[0]);
 	printf("Map[1] = %x\n", map[1]);
@@ -29,7 +33,6 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		cycle();
 		processInput();
-		render_console();
 		render_screen();
 		
 		//getchar();

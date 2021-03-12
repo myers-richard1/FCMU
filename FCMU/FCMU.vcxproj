@@ -148,12 +148,14 @@
     <ClCompile Include="Memory.c" />
     <ClCompile Include="Renderer.c" />
     <ClCompile Include="shaderloader.c" />
+    <ClCompile Include="TextureTest.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpu.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="shaderloader.h" />
+    <ClInclude Include="TextureTest.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
