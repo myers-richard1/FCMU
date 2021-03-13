@@ -47,16 +47,15 @@ void test() {
 		printf("%s\n", infolog);
 	}
 	else printf("frag shader compiled\n");
-	
 
-	GLuint program = glCreateProgram();
-	glAttachShader(program, vertShader);
-	glAttachShader(program, fragShader);
-	glLinkProgram(program);
+	GLuint mapProgram = glCreateProgram();
+	glAttachShader(mapProgram, vertShader);
+	glAttachShader(mapProgram, fragShader);
+	glLinkProgram(mapProgram);
 
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	glGetProgramiv(mapProgram, GL_LINK_STATUS, &success);
 	if (!success) {
-		glGetProgramInfoLog(program, 512, NULL, infolog);
+		glGetProgramInfoLog(mapProgram, 512, NULL, infolog);
 		printf("%s\n", infolog);
 	}
 
@@ -80,9 +79,11 @@ void test() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	//setup imageDataTexture
+	glActiveTexture(GL_TEXTURE0);
+	GLuint imageDataTexure;
+	glGenTextures(1, &imageDataTexure);
+	glBindTexture(GL_TEXTURE_2D, imageDataTexure);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -90,7 +91,56 @@ void test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 4096, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xa500]);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	GLuint imageDataVariableLocation = glGetUniformLocation(mapProgram, "imageData");
+	//gl use program is necessary before setting uniforms
+	glUseProgram(mapProgram);
+	glUniform1i(imageDataVariableLocation, 0);
+
+	//setup defaultColorTexture
+	glActiveTexture(GL_TEXTURE1);
+	GLuint defaultColorsTexture;
+	glGenTextures(1, &defaultColorsTexture);
+	glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 100, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
+	GLuint defaultColorDataVariableLocation = glGetUniformLocation(mapProgram, "defaultColorData");
+	glUniform1i(defaultColorDataVariableLocation, 1);
+
+	//setup map texture
+	glActiveTexture(GL_TEXTURE2);
+	GLuint mapTexture;
+	glGenTextures(1, &mapTexture);
+	glBindTexture(GL_TEXTURE_2D, mapTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 1024, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
+	GLuint mapVariableLocation = glGetUniformLocation(mapProgram, "mapData");
+	glUniform1i(mapVariableLocation, 2);
+
+	//setup palette texture
+	glActiveTexture(GL_TEXTURE3);
+	GLuint paletteTexture;
+	glGenTextures(1, &paletteTexture);
+	glBindTexture(GL_TEXTURE_2D, paletteTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 300, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
+	GLuint paletteVariableLocation = glGetUniformLocation(mapProgram, "paletteData");
+	glUniform1i(paletteVariableLocation, 3);
+
 	
 	glViewport(0, 0, 800, 600);
 
@@ -98,8 +148,14 @@ void test() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(program);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		//okay.... when you actually UPDATE the texture again, use TEXSUBIMAGE not TEXIMAGE. that's what the smart guys on SO said
+		glUseProgram(mapProgram);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, imageDataTexure);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, paletteTexture);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 

@@ -5,7 +5,10 @@ in vec3 uv;
 
 in float pixelX, pixelY;
 
-uniform usampler2D data;
+uniform usampler2D imageData;
+uniform usampler2D defaultColorData;
+uniform usampler2D mapData;
+uniform usampler2D paletteData;
 
 void main()
 {
@@ -15,12 +18,7 @@ void main()
     int byteIndex = row * 2;
     if (column > 3) byteIndex++;
 
-    //hardcoded for testing
-    //byteIndex = 0;
-    //column = 7;
-    //row = 0;
-
-    uint byteValue = texelFetch(data, ivec2(byteIndex, 0), 0).r;
+    uint byteValue = texelFetch(imageData, ivec2(byteIndex, 0), 0).r;
 
     uint columnInByte = uint(column);
     if (columnInByte > uint(3)) columnInByte = columnInByte - uint(4);
@@ -36,4 +34,7 @@ void main()
 
     if (bits == uint(3)) FragColor = vec4(0,0,0,1);
     else if (bits == uint(0)) FragColor = vec4(1,1,1,1);
+
+    uint colorByte = texelFetch(defaultColorData, ivec2(0,0),0).r;
+    if (colorByte != 0u) FragColor = vec4(1,0,0,1);
 } 

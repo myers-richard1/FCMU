@@ -12,6 +12,9 @@ void init_map() {
 	for (int i = 0; i < 1024; i++) {
 		map[0xB600 + i] = 0;
 	}
+	for (int i = 0; i < 256; i++) {
+		map[0xb500 + i] = 0;
+	}
 	byte solid = 0xFF;
 	byte left = 0xc0;
 	byte right = 0x0;
@@ -26,6 +29,5 @@ void init_map() {
 	for (int i = 0; i < 16; i++) {
 		map[0xa500 + i] = gridTile[i];
 	}
-
 }
 
