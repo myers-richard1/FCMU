@@ -44,13 +44,15 @@ void main()
     //bits now contains the color id number (0-3) of this pixel. we plug this ID into the palette to get the actual color
     //but first we need to find out what palette we're using
     uint paletteID = texelFetch(defaultColorData, ivec2(tileID, 0), 0).r;
+    //mask out extra bits
+    paletteID &= 63u;
+
     //since there's four colors in each palette, we need to select the color from the palette
     uint colorOffset = paletteID * 4u;
     //now we get the palette from the palette data by adding the bits to the offset to select one of the four
     uvec3 palette = texelFetch(paletteData, ivec2(colorOffset + bits, 0), 0).rgb;
+    vec4 outColor = vec4(float(palette.r)/255,float(palette.g)/255,float(palette.b)/255,1);
 
-    FragColor = vec4(palette.r,palette.g,palette.b,1);
-
-    //if (bits == uint(3)) FragColor = vec4(0,0,0,1);
-    //else if (bits == uint(0)) FragColor = vec4(1,1,1,1);
+    //FragColor = vec4(palette.r,palette.g,palette.b,1);
+    FragColor = outColor;
 } 

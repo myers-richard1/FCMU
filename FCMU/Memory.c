@@ -5,13 +5,16 @@
 
 
 void init_map() {
+	time_t t;
+	srand((unsigned)time(&t));
 	map = malloc(sizeof(byte) * 0xFFFF); //allocate a 16bit address space
-	for (int i = 0; i < 0xFFFF; i++) map[i] = 0x00;
+	for (int i = 0; i < 0xFFFF; i++) map[i] = rand() % 256;
+	//return;
 
 	//hardcoded tests
 	//intialize background map 0
 	for (int i = 0; i < 1024; i++) {
-		map[0xB600 + i] = 1;
+		map[0xB600 + i] = 0;
 	}
 	map[0xb600] = 0;
 
@@ -40,6 +43,7 @@ void init_map() {
 	byte black[] = { 0,0,0 };
 	byte green[] = { 0, 255, 0 };
 	byte red[] = { 255, 0, 0 };
+	byte blue[] = { 0, 0, 255 };
 
 	//initialize palette with colors
 	//for each of the 64 palettes
@@ -49,7 +53,7 @@ void init_map() {
 		addr += paletteStart;
 		//color 00
 		for (int j = 0; j < 3; j++) {
-			map[addr++] = white[j];
+			map[addr++] = blue[j];
 		}
 		//color 01
 		for (int j = 0; j < 3; j++) {
@@ -61,7 +65,7 @@ void init_map() {
 		}
 		//color 11
 		for (int j = 0; j < 3; j++) {
-			map[addr++] = green[j];
+			map[addr++] = green[i];
 		}
 	}
 }

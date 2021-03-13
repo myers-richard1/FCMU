@@ -107,7 +107,7 @@ void test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 100, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 256, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
 	GLuint defaultColorDataVariableLocation = glGetUniformLocation(mapProgram, "defaultColorData");
 	glUniform1i(defaultColorDataVariableLocation, 1);
 
@@ -137,6 +137,7 @@ void test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	//it's 256 "elements" because each element is 3 numbers
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8UI, 256, 1, 0, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
 	GLuint paletteVariableLocation = glGetUniformLocation(mapProgram, "paletteData");
 	glUniform1i(paletteVariableLocation, 3);
@@ -152,10 +153,16 @@ void test() {
 		glUseProgram(mapProgram);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, imageDataTexure);
-		glActiveTexture(GL_TEXTURE1);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 4096, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xa500]);
+		glActiveTexture(GL_TEXTURE1); 
 		glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
+		glTexSubImage2D(GL_TEXTURE_2D, 0,0,0, 256, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, mapTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, 0,0,1024, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, paletteTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, 0,0,256, 1, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
