@@ -137,7 +137,7 @@ void test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 300, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8UI, 256, 1, 0, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
 	GLuint paletteVariableLocation = glGetUniformLocation(mapProgram, "paletteData");
 	glUniform1i(paletteVariableLocation, 3);
 
