@@ -7,21 +7,33 @@
 #include "shaderloader.h"
 #include "Memory.h"
 
+GLuint vertShader;
+GLuint fragShader;
+GLuint mapProgram;
+GLuint imageDataTexture;
+GLuint defaultColorsTexture;
+GLuint mapTexture;
+GLuint paletteTexture;
+GLuint vao;
+GLuint vbo;
 
-void test() {
+GLFWwindow* window;
+
+
+GLFWwindow* test() {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Test", NULL, NULL);
+	window = glfwCreateWindow(600, 600, "Test", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return;
 
 	char* vertsrc = loadShader("test.vert");
 	char* fragsrc = loadShader("test.frag");
 
-	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+	vertShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertShader, 1, &vertsrc, NULL);
 	glCompileShader(vertShader);
 	int success;
@@ -35,7 +47,7 @@ void test() {
 	else printf("Vert shader compiled\n");
 
 
-	GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragShader, 1, &fragsrc, NULL);
 	glCompileShader(fragShader);
 	
@@ -48,7 +60,9 @@ void test() {
 	}
 	else printf("frag shader compiled\n");
 
-	GLuint mapProgram = glCreateProgram();
+	free(vertsrc);
+	free(fragsrc);
+	mapProgram = glCreateProgram();
 	glAttachShader(mapProgram, vertShader);
 	glAttachShader(mapProgram, fragShader);
 	glLinkProgram(mapProgram);
@@ -68,7 +82,7 @@ void test() {
 		1, -1, 0
 	};
 
-	GLuint vbo, vao;
+	vbo, vao;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
 
@@ -81,9 +95,9 @@ void test() {
 
 	//setup imageDataTexture
 	glActiveTexture(GL_TEXTURE0);
-	GLuint imageDataTexure;
-	glGenTextures(1, &imageDataTexure);
-	glBindTexture(GL_TEXTURE_2D, imageDataTexure);
+	imageDataTexture;
+	glGenTextures(1, &imageDataTexture);
+	glBindTexture(GL_TEXTURE_2D, imageDataTexture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -98,7 +112,7 @@ void test() {
 
 	//setup defaultColorTexture
 	glActiveTexture(GL_TEXTURE1);
-	GLuint defaultColorsTexture;
+	defaultColorsTexture;
 	glGenTextures(1, &defaultColorsTexture);
 	glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
 
@@ -113,7 +127,7 @@ void test() {
 
 	//setup map texture
 	glActiveTexture(GL_TEXTURE2);
-	GLuint mapTexture;
+	mapTexture;
 	glGenTextures(1, &mapTexture);
 	glBindTexture(GL_TEXTURE_2D, mapTexture);
 
@@ -128,7 +142,7 @@ void test() {
 
 	//setup palette texture
 	glActiveTexture(GL_TEXTURE3);
-	GLuint paletteTexture;
+	paletteTexture;
 	glGenTextures(1, &paletteTexture);
 	glBindTexture(GL_TEXTURE_2D, paletteTexture);
 
@@ -142,32 +156,31 @@ void test() {
 	GLuint paletteVariableLocation = glGetUniformLocation(mapProgram, "paletteData");
 	glUniform1i(paletteVariableLocation, 3);
 
-	
-	glViewport(0, 0, 800, 600);
+	return window;
+}
 
-	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+void draw() {
+	glViewport(0, 0, 600, 600);
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-		//okay.... when you actually UPDATE the texture again, use TEXSUBIMAGE not TEXIMAGE. that's what the smart guys on SO said
-		glUseProgram(mapProgram);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, imageDataTexure);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 4096, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xa500]);
-		glActiveTexture(GL_TEXTURE1); 
-		glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
-		glTexSubImage2D(GL_TEXTURE_2D, 0,0,0, 256, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, mapTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, 0,0,1024, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, paletteTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, 0,0,256, 1, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
-		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+	//draw background 0
+	glUseProgram(mapProgram);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, imageDataTexture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 4096, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xa500]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, mapTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, paletteTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
-	return;
+	glfwSwapBuffers(window);
+	glfwPollEvents();
 }

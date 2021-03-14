@@ -19,23 +19,14 @@ void load_rom(char *filename);
 
 int main() {
 	init_map();
-	test();
-	return 0;
-	printf("Hello, graphics world!\n");
 	
-	window = init_renderer();
 	load_rom("output.bin");
-	printf("Map[0] = %x\n", map[0]);
-	printf("Map[1] = %x\n", map[1]);
 	init_cpu();
-	//test_cpu();
-	
+	window = test();
 	while (!glfwWindowShouldClose(window)) {
 		cycle();
 		processInput();
-		render_screen();
-		
-		//getchar();
+		draw();
 	}
 	glfwTerminate();
 	return 0;

@@ -9,7 +9,7 @@ void init_map() {
 	srand((unsigned)time(&t));
 	map = malloc(sizeof(byte) * 0xFFFF); //allocate a 16bit address space
 	for (int i = 0; i < 0xFFFF; i++) map[i] = rand() % 256;
-	//return;
+	return;
 
 	//hardcoded tests
 	//intialize background map 0
