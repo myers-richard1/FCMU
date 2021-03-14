@@ -104,7 +104,7 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 4096, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xa500]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 4096, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint imageDataVariableLocation = glGetUniformLocation(mapProgram, "imageData");
 	//gl use program is necessary before setting uniforms
 	glUseProgram(mapProgram);
@@ -121,7 +121,7 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 256, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 256, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint defaultColorDataVariableLocation = glGetUniformLocation(mapProgram, "defaultColorData");
 	glUniform1i(defaultColorDataVariableLocation, 1);
 
@@ -136,7 +136,7 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 1024, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 1024, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint mapVariableLocation = glGetUniformLocation(mapProgram, "mapData");
 	glUniform1i(mapVariableLocation, 2);
 
@@ -152,7 +152,7 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//it's 256 "elements" because each element is 3 numbers
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8UI, 256, 1, 0, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8UI, 256, 1, 0, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint paletteVariableLocation = glGetUniformLocation(mapProgram, "paletteData");
 	glUniform1i(paletteVariableLocation, 3);
 
@@ -160,6 +160,7 @@ GLFWwindow* test() {
 }
 
 void draw() {
+	GLenum err;
 	glViewport(0, 0, 600, 600);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -169,18 +170,31 @@ void draw() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, imageDataTexture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 4096, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xa500]);
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("1There was an error: %d\n", err);
+	}
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("2There was an error: %d\n", err);
+	}
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, mapTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("3There was an error: %d\n", err);
+	}
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, paletteTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("4There was an error: %d\n", err);
+	}
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 }

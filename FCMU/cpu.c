@@ -44,7 +44,7 @@ void cycle() {
 	if (halted) return;
 	//fetch
 	byte instruction = map[pc];
-	printf("Instruction loaded from pc 0x%x: %x\n", pc, instruction);
+	//printf("Instruction loaded from pc 0x%x: %x\n", pc, instruction);
 	//reset state
 	currentInstruction.func = nopfunc;
 	currentInstruction.leftByteOperand = NULL;
@@ -76,7 +76,7 @@ void decode(byte instruction) {
 	}
 	//weird 8bit loads
 	else if (instruction < 0xB0) {
-		printf("Instruction 0x%x found, weird load\n", instruction);
+		//printf("Instruction 0x%x found, weird load\n", instruction);
 		currentInstruction.func = ld;
 		byte* pointer = renderRarePointer(instruction & 0x0f);
 		currentInstruction.leftByteOperand = &rA;
@@ -94,7 +94,7 @@ void decode(byte instruction) {
 	}
 	//flow control
 	else if (instruction < 0xD8) {
-		printf("Flow control instruction\n");
+		//printf("Flow control instruction\n");
 		int reranged = instruction - 0xc0;
 		currentInstruction.func = flaggedFunctorMap[reranged / 8];
 		currentInstruction.flag = flags[instruction & 0x0f];
@@ -151,7 +151,10 @@ byte* renderPointer(int index) {
 word* rareParameterMap[] = { &rBC, &rDE, &rHL, &rHL, &rBC, &rDE, &rHL, &rHL };
 byte* renderRarePointer(int index) {
 	byte* toReturn = &map[*rareParameterMap[index]];
-	if(index == 2 || index == 6) rHL++;
+	if (index == 2 || index == 6) {
+		rHL++;
+		//printf("Incrementing HL. hl is now: %x\n", rHL);
+	}
 	if (index == 3 || index == 7) rHL--;
 	return toReturn;
 }
@@ -165,7 +168,7 @@ void execute() {
 	else if (currentInstruction.func == nopfunc) printf("nop\n");
 	else if (currentInstruction.func == halt) haltOp();
 	else {
-		printf("Unknown func\n");
+		//printf("Unknown func\n");
 	}
 }
 
@@ -225,19 +228,21 @@ void jumpOp() {
 		//hardcoded for now, figure this out
 		if (currentInstruction.flag == flagNZ) {
 			if ((rF & flagZMask)) {
-				printf("Flag z is set! not jumping\n");
+				//printf("Flag z is set! not jumping\n");
 				return;
 			}
 		}
 	}
 	
 	word address = (highByte << 8) | lowByte;
-	printf("Flag z not set, jumping to 0x%x\n", address);
+	//printf("Flag z not set, jumping to 0x%x\n", address);
 	pc = address;
+	//dec pc to make up for inc right after
+	pc--;
 }
 
 void haltOp() { 
-	printf("Halting\n");
+	//printf("Halting\n");
 	halted = 1;
 }
 
