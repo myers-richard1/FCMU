@@ -10,6 +10,7 @@
 #include "TextureTest.h"
 
 void init();
+void process_framerate();
 
 GLFWwindow* window;
 
@@ -17,14 +18,22 @@ void processInput();
 void render();
 void load_rom(char *filename);
 
+double currentTime, previousTime;
+int frameCount;
+
 int main() {
 	init_map();
 	
 	load_rom("output.bin");
 	init_cpu();
 	window = test();
+	previousTime = glfwGetTime();
+	frameCount = 0;
+	int cyclesPerFrame = (4000 / 60);
 	while (!glfwWindowShouldClose(window)) {
-		cycle();
+		process_framerate();
+		for (int i = 0; i < cyclesPerFrame; i++)
+			cycle();
 		processInput();
 		draw();
 	}
@@ -33,7 +42,15 @@ int main() {
 }
 
 
-
+void process_framerate() {
+	double currentTime = glfwGetTime();
+	frameCount++;
+	if (currentTime - previousTime >= 1) {
+		printf("FPS: %d\n", frameCount);
+		frameCount = 0;
+		previousTime = currentTime;
+	}
+}
 
 void processInput() {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
