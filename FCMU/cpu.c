@@ -242,7 +242,7 @@ void jumpOp() {
 }
 
 void haltOp() { 
-	//printf("Halting\n");
+	printf("Halting\n");
 	halted = 1;
 }
 

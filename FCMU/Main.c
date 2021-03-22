@@ -23,7 +23,6 @@ int frameCount;
 
 int main() {
 	init_map();
-	
 	load_rom("output.bin");
 	init_cpu();
 	window = test();
@@ -72,6 +71,6 @@ void load_rom(char* filename) {
 	fclose(f);
 
 	memcpy(map, string, fsize);
-
+	free(string);
 	string[fsize] = 0;
 }
