@@ -30,8 +30,10 @@ GLFWwindow* test() {
 	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return;
 
-	char* vertsrc = loadShader("test.vert");
-	char* fragsrc = loadShader("test.frag");
+	char* vertsrc = loadShader("rendertilemap.vert");
+	char* fragsrc = loadShader("rendertilemap.frag");
+	//char* vertsrc = loadShader("test.vert");
+	//char* fragsrc = loadShader("test.frag");
 
 	vertShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertShader, 1, &vertsrc, NULL);

@@ -9,7 +9,7 @@ void init_map() {
 	srand((unsigned)time(&t));
 	map = malloc(sizeof(byte) * 0xFFFF); //allocate a 16bit address space
 	for (int i = 0; i < 0xFFFF; i++) map[i] = rand() % 256;
-	//return;
+	return;
 
 	//hardcoded tests
 	//intialize background map 0
@@ -70,7 +70,7 @@ void init_map() {
 	}
 	//copy fontset
 	for (int i = 0; i < 128; i++) {
-		map[0xa500 + i] = pixels[i];
+		//map[0xa500 + i] = pixels[i];
 	}
 	byte tilemap[] = { 1, 2, 3, 3, 4, 0, 5, 4, 6, 3, 7 };
 	for (int i = 0; i < 11; i++) {

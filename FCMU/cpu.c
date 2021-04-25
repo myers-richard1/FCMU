@@ -139,6 +139,7 @@ void decode(byte instruction) {
 	} 
 	//nop
 	else {
+		printf("Nopping because the instruction %x didn't map\n", instruction);
 		currentInstruction.func = nopfunc;
 	}
 }
@@ -218,6 +219,10 @@ void decrement() {
 		(*currentInstruction.rightByteOperand)--;
 		if (*currentInstruction.rightByteOperand == 0) setZ; else resetZ;
 		if (currentInstruction.rightByteOperand == 0xff) setC; else resetC;
+	}
+	else if (currentInstruction.rightWordOperand != NULL) {
+		(*currentInstruction.rightWordOperand)--;
+		if (*currentInstruction.rightWordOperand == 0) setZ; else resetZ;
 	}
 }
 
