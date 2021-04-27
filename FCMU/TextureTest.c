@@ -26,14 +26,14 @@ GLFWwindow* test() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(600, 600, "Test", NULL, NULL);
+	window = glfwCreateWindow(600, 600, "Lemon8", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return;
 
-	char* vertsrc = loadShader("rendertilemap.vert");
-	char* fragsrc = loadShader("rendertilemap.frag");
-	//char* vertsrc = loadShader("test.vert");
-	//char* fragsrc = loadShader("test.frag");
+	//char* vertsrc = loadShader("rendertilemap.vert");
+	//char* fragsrc = loadShader("rendertilemap.frag");
+	char* vertsrc = loadShader("test.vert");
+	char* fragsrc = loadShader("test.frag");
 
 	vertShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertShader, 1, &vertsrc, NULL);

@@ -95,6 +95,7 @@ void decode(byte instruction) {
 	//flow control
 	else if (instruction < 0xD8) {
 		//printf("Flow control instruction\n");
+		//TODO... document what the heck reranged is cuz i really dont remember
 		int reranged = instruction - 0xc0;
 		currentInstruction.func = flaggedFunctorMap[reranged / 8];
 		currentInstruction.flag = flags[instruction & 0x0f];
@@ -180,6 +181,8 @@ void nop() {
 void load() {
 	if (currentInstruction.leftByteOperand != NULL) {
 		*currentInstruction.leftByteOperand = *currentInstruction.rightByteOperand;
+		if (*currentInstruction.leftByteOperand == 0) setZ;
+		else resetZ;
 	}
 	else {
 		*currentInstruction.leftWordOperand = *currentInstruction.rightWordOperand;
@@ -230,10 +233,19 @@ void jumpOp() {
 	byte lowByte = map[++pc];
 	byte highByte = map[++pc];
 	if (currentInstruction.flag != none) {
+		//this probably could be a lot cleaner...
 		//hardcoded for now, figure this out
 		if (currentInstruction.flag == flagNZ) {
 			if ((rF & flagZMask)) {
 				//printf("Flag z is set! not jumping\n");
+				return;
+			}
+		}
+		//if instruction is jp z
+		if (currentInstruction.flag == flagZ) {
+			//and z is NOT set, don't jump
+			if (!(rF & flagZMask)) {
+				//printf("Flag Z was not set, not jumping\n");
 				return;
 			}
 		}
