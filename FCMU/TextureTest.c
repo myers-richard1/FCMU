@@ -23,17 +23,20 @@ GLFWwindow* window;
 
 
 GLFWwindow* test() {
+	//regular init stuff
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	//create the actual window
 	window = glfwCreateWindow(600, 600, "Lemon8", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return;
 
 	//char* vertsrc = loadShader("rendertilemap.vert");
 	//char* fragsrc = loadShader("rendertilemap.frag");
+	//compile the shaders
 	char* vertsrc = loadShader("test.vert");
 	char* fragsrc = loadShader("test.frag");
 
@@ -64,8 +67,10 @@ GLFWwindow* test() {
 	}
 	else printf("frag shader compiled\n");
 
+	//free the shader text that was allocated
 	free(vertsrc);
 	free(fragsrc);
+	//create the shader program and link the shaders
 	mapProgram = glCreateProgram();
 	glAttachShader(mapProgram, vertShader);
 	glAttachShader(mapProgram, fragShader);
@@ -77,6 +82,7 @@ GLFWwindow* test() {
 		printf("%s\n", infolog);
 	}
 
+	//set up the quad that represents the screen
 	float vertices[] = {
 		-1, -1, 0,
 		-1, 1, 0,
@@ -86,6 +92,7 @@ GLFWwindow* test() {
 		1, -1, 0
 	};
 
+	//create out vbo and vao
 	vbo, vao;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
@@ -97,7 +104,7 @@ GLFWwindow* test() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	//setup imageDataTexture
+	//setup imageDataTexture (texture that holds the actual pixels of the tiles)
 	glActiveTexture(GL_TEXTURE0);
 	imageDataTexture;
 	glGenTextures(1, &imageDataTexture);
@@ -107,14 +114,15 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+	
+	//fill the texture with zeroes
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 4096, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint imageDataVariableLocation = glGetUniformLocation(mapProgram, "imageData");
 	//gl use program is necessary before setting uniforms
 	glUseProgram(mapProgram);
 	glUniform1i(imageDataVariableLocation, 0);
 
-	//setup defaultColorTexture
+	//setup defaultColorTexture (the texture that represents the colors that should be mapped to the tiles)
 	glActiveTexture(GL_TEXTURE1);
 	defaultColorsTexture;
 	glGenTextures(1, &defaultColorsTexture);
@@ -125,11 +133,12 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	//fill the texture with zeroes
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 256, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint defaultColorDataVariableLocation = glGetUniformLocation(mapProgram, "defaultColorData");
 	glUniform1i(defaultColorDataVariableLocation, 1);
 
-	//setup map texture
+	//setup map texture (the actual tilemap for the background
 	glActiveTexture(GL_TEXTURE2);
 	mapTexture;
 	glGenTextures(1, &mapTexture);
@@ -140,11 +149,12 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	//fill the texture with zeroes
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 1024, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint mapVariableLocation = glGetUniformLocation(mapProgram, "mapData");
 	glUniform1i(mapVariableLocation, 2);
 
-	//setup palette texture
+	//setup palette texture (the texture that holds the rgb values for each color index in the color map)
 	glActiveTexture(GL_TEXTURE3);
 	paletteTexture;
 	glGenTextures(1, &paletteTexture);
@@ -155,15 +165,18 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	//fill with zeroes
 	//it's 256 "elements" because each element is 3 numbers
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8UI, 256, 1, 0, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint paletteVariableLocation = glGetUniformLocation(mapProgram, "paletteData");
 	glUniform1i(paletteVariableLocation, 3);
 
+	//return the window pointer
 	return window;
 }
 
 void draw() {
+	//clear the screen
 	GLenum err;
 	glViewport(0, 0, 600, 600);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -172,6 +185,7 @@ void draw() {
 	//draw background 0
 	glUseProgram(mapProgram);
 	glActiveTexture(GL_TEXTURE0);
+	//buffer the image data, the color indices, the tilemap, and the color palette into vram
 	glBindTexture(GL_TEXTURE_2D, imageDataTexture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 4096, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[TILE_PIXEL_DATA_ADDR]);
 	while ((err = glGetError()) != GL_NO_ERROR) {
@@ -195,10 +209,11 @@ void draw() {
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		printf("4There was an error: %d\n", err);
 	}
+	//bind the vao and draw (does this vao not need to be bound before buffering?)
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	
+	//swap buffers and get input
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 }
