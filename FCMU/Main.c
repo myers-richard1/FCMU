@@ -26,6 +26,7 @@ int main() {
 	load_rom("output.bin");
 	init_cpu();
 	window = test();
+	glfwSetWindowPos(window, 100, 100);
 	previousTime = glfwGetTime();
 	frameCount = 0;
 	int cyclesPerFrame = (4000 / 60);

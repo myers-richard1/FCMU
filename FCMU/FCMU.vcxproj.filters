@@ -56,5 +56,8 @@
     <ClInclude Include="TextureTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Hardware.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

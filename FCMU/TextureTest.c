@@ -7,6 +7,8 @@
 #include "shaderloader.h"
 #include "Memory.h"
 
+#include "Hardware.h"
+
 GLuint vertShader;
 GLuint fragShader;
 GLuint mapProgram;
@@ -171,25 +173,25 @@ void draw() {
 	glUseProgram(mapProgram);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, imageDataTexture);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 4096, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xa500]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 4096, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[TILE_PIXEL_DATA_ADDR]);
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		printf("1There was an error: %d\n", err);
 	}
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, defaultColorsTexture);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb500]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[TILE_COLOR_DATA_ADDR]);
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		printf("2There was an error: %d\n", err);
 	}
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, mapTexture);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[0xb600]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &map[BACKGROUND_MAP_ADDR]);
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		printf("3There was an error: %d\n", err);
 	}
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, paletteTexture);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[0xd400]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 1, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, &map[PALETTE_DATA_ADDR]);
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		printf("4There was an error: %d\n", err);
 	}
