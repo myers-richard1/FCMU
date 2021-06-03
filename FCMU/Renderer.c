@@ -1,6 +1,8 @@
-#pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "Renderer.h"
 #include "shaderloader.h"
 #include "Memory.h"
@@ -9,7 +11,7 @@ GLFWwindow* window;
 
 GLuint screen_VAO;
 
-GLuint screen_VBO; 
+GLuint screen_VBO;
 
 GLuint screen_VertexShader, screen_FragmentShader;
 GLuint screen_program;
@@ -42,7 +44,7 @@ GLFWwindow* init_renderer() {
 	/*initialize glad*/
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		printf("GLAD broke :(");
-		return -1;
+		return (GLFWwindow*)-1;
 	}
 	/*initialize our rendering viewport*/
 	glViewport(0, 0, 600, 600);
@@ -53,7 +55,7 @@ GLFWwindow* init_renderer() {
 	glGenVertexArrays(1, &screen_VAO);
 	glBindVertexArray(screen_VAO);
 	init_screen_buffers();
-	
+
 	return window;
 }
 
@@ -63,8 +65,8 @@ void init_screen_buffers() {
 	glGenBuffers(1, &screen_VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, screen_VBO);
 
-	char* vertexshadersrc = loadShader("screen.vert");
-	char* fragshadersrc = loadShader("screen.frag");
+	const GLchar* vertexshadersrc = loadShader("screen.vert");
+	const GLchar* fragshadersrc = loadShader("screen.frag");
 
 	screen_VertexShader = glCreateShader(GL_VERTEX_SHADER);
 	screen_FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -107,8 +109,8 @@ void init_screen_buffers() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	printf("attribute arrays\n");
-	free(vertexshadersrc);
-	free(fragshadersrc);
+	free((void*)vertexshadersrc);
+	free((void*)fragshadersrc);
 
 	glGenTextures(1, &tileDataTexture);
 	glBindTexture(GL_TEXTURE_2D, tileDataTexture);

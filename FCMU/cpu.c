@@ -1,5 +1,3 @@
-#pragma once
-
 #include "cpu.h"
 #include "Memory.h"
 #include "Types.h"
@@ -22,7 +20,7 @@ void init_cpu() {
 	pc = 0;
 	rAF = 0;
 	rBC = 0;
-	rDE = 0; 
+	rDE = 0;
 	rHL = 0;
 }
 
@@ -100,7 +98,7 @@ void decode(byte instruction) {
 		currentInstruction.func = flaggedFunctorMap[reranged / 8];
 		currentInstruction.flag = flags[instruction & 0x0f];
 	}
-	//push and pop instructions 
+	//push and pop instructions
 	else if (instruction < 0xe0) {
 		if ((instruction - 0xD8) < 4) currentInstruction.func = push;
 		else currentInstruction.func = pop;
@@ -116,7 +114,7 @@ void decode(byte instruction) {
 	else if (instruction < 0xF0) {
 		currentInstruction.func = ld;
 		currentInstruction.leftWordOperand = parameterMap16[instruction & 0x0f];
-		currentInstruction.rightWordOperand = &map[++pc];
+		currentInstruction.rightWordOperand = (word*)&map[++pc];
 		pc++;
 	}
 	//parameterless instructions (test this, the map changed)
@@ -135,9 +133,9 @@ void decode(byte instruction) {
 	//ld sp, hl
 	else if (instruction == 0xfe) {
 		currentInstruction.func = ld;
-		currentInstruction.leftByteOperand = &sp; 
-		currentInstruction.rightByteOperand = &rHL;
-	} 
+		currentInstruction.leftByteOperand = (byte*)&sp;
+		currentInstruction.rightByteOperand = (byte*)&rHL;
+	}
 	//nop
 	else {
 		printf("Nopping because the instruction %x didn't map\n", instruction);
@@ -221,7 +219,7 @@ void decrement() {
 	if (currentInstruction.rightByteOperand != NULL) {
 		(*currentInstruction.rightByteOperand)--;
 		if (*currentInstruction.rightByteOperand == 0) setZ; else resetZ;
-		if (currentInstruction.rightByteOperand == 0xff) setC; else resetC;
+		if (*currentInstruction.rightByteOperand == 0xff) setC; else resetC;
 	}
 	else if (currentInstruction.rightWordOperand != NULL) {
 		(*currentInstruction.rightWordOperand)--;
@@ -250,7 +248,7 @@ void jumpOp() {
 			}
 		}
 	}
-	
+
 	word address = (highByte << 8) | lowByte;
 	//printf("Flag z not set, jumping to 0x%x\n", address);
 	pc = address;
@@ -258,8 +256,7 @@ void jumpOp() {
 	pc--;
 }
 
-void haltOp() { 
+void haltOp() {
 	printf("Halting\n");
 	halted = 1;
 }
-

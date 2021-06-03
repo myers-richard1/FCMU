@@ -1,7 +1,7 @@
-#pragma once
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "TextureTest.h"
 #include "shaderloader.h"
@@ -32,13 +32,13 @@ GLFWwindow* test() {
 	//create the actual window
 	window = glfwCreateWindow(600, 600, "Lemon8", NULL, NULL);
 	glfwMakeContextCurrent(window);
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return;
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return (GLFWwindow*)-1;
 
 	//char* vertsrc = loadShader("rendertilemap.vert");
 	//char* fragsrc = loadShader("rendertilemap.frag");
 	//compile the shaders
-	char* vertsrc = loadShader("test.vert");
-	char* fragsrc = loadShader("test.frag");
+	const GLchar* vertsrc = loadShader("test.vert");
+	const GLchar* fragsrc = loadShader("test.frag");
 
 	vertShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertShader, 1, &vertsrc, NULL);
@@ -57,8 +57,8 @@ GLFWwindow* test() {
 	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragShader, 1, &fragsrc, NULL);
 	glCompileShader(fragShader);
-	
-	
+
+
 	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
@@ -68,8 +68,8 @@ GLFWwindow* test() {
 	else printf("frag shader compiled\n");
 
 	//free the shader text that was allocated
-	free(vertsrc);
-	free(fragsrc);
+	free((void*)vertsrc);
+	free((void*)fragsrc);
 	//create the shader program and link the shaders
 	mapProgram = glCreateProgram();
 	glAttachShader(mapProgram, vertShader);
@@ -88,7 +88,7 @@ GLFWwindow* test() {
 		-1, 1, 0,
 		1, -1, 0,
 		-1, 1, 0,
-		1, 1, 0, 
+		1, 1, 0,
 		1, -1, 0
 	};
 
@@ -114,7 +114,7 @@ GLFWwindow* test() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
+
 	//fill the texture with zeroes
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, 4096, 1, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	GLuint imageDataVariableLocation = glGetUniformLocation(mapProgram, "imageData");
